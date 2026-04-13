@@ -4,6 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")  
 }
 
 enum Role {
@@ -13,13 +14,13 @@ enum Role {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   name      String
   email     String   @unique
-  password  String?  
-  role      Role     @default(MEMBER)
+  password  String?
+  googleId  String?  @unique
+  avatar    String?
+  role      String   @default("MEMBER")
   createdAt DateTime @default(now())
-   
-  googleId  String?  @unique  // Stores Google's unique ID for this user
-  avatar    String?            // Stores profile picture URL from Google
+  updatedAt DateTime? @updatedAt
 }
