@@ -7,14 +7,27 @@ const signToken = (id: string, email: string, role: string): string =>
 
 export const registerUser = async (userData: any) => {
   try {
-    const existing = await prisma.user.findUnique({
+    // Check if email already exists
+    const existingEmail = await prisma.user.findUnique({
       where: { email: userData.email },
     });
 
-    if (existing) {
+    if (existingEmail) {
       return {
         success: false,
         message: "Email already in use",
+      };
+    }
+
+    // Check if username already exists
+    const existingName = await prisma.user.findUnique({
+      where: { name: userData.name },
+    });
+
+    if (existingName) {
+      return {
+        success: false,
+        message: "Username already taken. Please choose another.",
       };
     }
 
@@ -43,10 +56,28 @@ export const registerUser = async (userData: any) => {
         createdAt: user.createdAt,
       },
     };
-  } catch (error) {
+  } catch (error: any) {
+    
+    if (error.code === 'P2002') {
+      const field = error.meta?.target?.[0];
+      if (field === 'name') {
+        return {
+          success: false,
+          message: "Username already taken. Please choose another.",
+        };
+      }
+      if (field === 'email') {
+        return {
+          success: false,
+          message: "Email already in use",
+        };
+      }
+    }
+    
+    console.error("Registration error:", error);
     return {
       success: false,
-      message: "Server error",
+      message: "Server error. Please try again later.",
     };
   }
 };
@@ -98,9 +129,10 @@ export const loginUser = async (userData: any) => {
       },
     };
   } catch (error) {
+    console.error("Login error:", error);
     return {
       success: false,
-      message: "Server error",
+      message: "Server error. Please try again later.",
     };
   }
 };

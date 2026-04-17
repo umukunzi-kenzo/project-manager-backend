@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")  
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -13,14 +13,73 @@ enum Role {
   MEMBER
 }
 
+enum Priority {
+  high
+  medium
+  low
+}
+
+enum Status {
+  planning
+  in_progress
+  completed
+  overdue
+}
+
+enum Section {
+  department
+  other
+}
+
 model User {
   id        String   @id @default(cuid())
-  name      String
+  name      String   @unique
   email     String   @unique
   password  String?
+  role      Role     @default(MEMBER)
   googleId  String?  @unique
   avatar    String?
-  role      String   @default("MEMBER")
   createdAt DateTime @default(now())
-  updatedAt DateTime? @updatedAt
+  updatedAt DateTime @updatedAt
+  
+  projectsCreated  Project[] @relation("CreatedProjects")
+  projectsAssigned Project[] @relation("AssignedProjects")
+  tasksAssigned    Task[]    @relation("AssignedTasks")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  priority    Priority @default(medium)
+  status      Status   @default(planning)
+  section     Section  @default(other)
+  visibility  String   @default("private")
+  startDate   DateTime
+  endDate     DateTime
+  archived    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  createdById String
+  assigneeId  String?
+  
+  createdBy User @relation("CreatedProjects", fields: [createdById], references: [id])
+  assignee  User? @relation("AssignedProjects", fields: [assigneeId], references: [id])
+  
+  tasks Task[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  projectId   String
+  assignedToId String?
+  
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignedTo  User?   @relation("AssignedTasks", fields: [assignedToId], references: [id])
 }
