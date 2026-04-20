@@ -1,31 +1,17 @@
 import { Router } from "express";
 import { authenticate } from "../middleware/auth.middleware";
-import {
-  getProjects,
-  getProject,
-  create,
-  update,
-  remove,
-  createTask,
-  editTask,
-  removeTask
-} from "../controllers/project.controller";
+import { projectController } from "../controllers/project.controller";
+import { validate } from "../middleware/validate.middleware";
+import { createProjectSchema, updateProjectSchema } from "../schemas/project.schema";
 
 const router = Router();
 
-// All project routes require authentication
 router.use(authenticate);
 
-// Project CRUD
-router.get("/", getProjects);
-router.get("/:id", getProject);
-router.post("/", create);
-router.put("/:id", update);
-router.delete("/:id", remove);
-
-// Task CRUD
-router.post("/:projectId/tasks", createTask);
-router.put("/tasks/:taskId", editTask);
-router.delete("/tasks/:taskId", removeTask);
+router.get("/", projectController.getProjects);
+router.get("/:id", projectController.getProject);
+router.post("/", validate(createProjectSchema), projectController.create);
+router.put("/:id", validate(updateProjectSchema), projectController.update);
+router.delete("/:id", projectController.remove);
 
 export default router;
