@@ -1,15 +1,15 @@
 import { Router } from "express";
-import { register, login } from "../controllers/auth.controller";
-import { googleAuth, googleRegister } from "../controllers/google.controller";
+import { authController } from "../controllers/auth.controller";
+import { googleController } from "../controllers/google.controller";
 import { validate } from "../middleware/validate.middleware";
-import { registerSchema, loginSchema } from "../schemas/validation.schema";
+import { registerSchema, loginSchema } from "../schemas/auth.schema";
 
 const router = Router();
 
-router.post("/register", validate(registerSchema), register);
-router.post("/login", validate(loginSchema), login);
+router.post("/register", validate(registerSchema), authController.register);
+router.post("/login", validate(loginSchema), authController.login);
 
-router.post("/google", googleAuth);
-router.post("/google-register", googleRegister);
+router.post("/google", googleController.googleAuth);
+router.post("/google-register", googleController.googleRegister);
 
 export default router;
