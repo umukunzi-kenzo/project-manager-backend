@@ -5,5 +5,5 @@ export default defineConfig({
   datasource: {
     url: process.env.DATABASE_URL!,
   },
-  engine: "classic", 
+  engine: "classic",   
 })

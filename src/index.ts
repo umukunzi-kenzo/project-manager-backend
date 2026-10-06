@@ -9,8 +9,14 @@ import taskRoutes from "./routes/task.routes";
 dotenv.config();
 
 const app = express();
-
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:3000" }));
+;
+app.use(cors({ 
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001"
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 app.get("/", (_, res) => res.send("Server is running!"));
