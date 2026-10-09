@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import projectRoutes from "./routes/project.routes";
@@ -9,7 +10,7 @@ import taskRoutes from "./routes/task.routes";
 dotenv.config();
 
 const app = express();
-;
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -19,15 +20,17 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (curl, Postman, mobile apps)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    console.log("CORS blocked origin:", origin);
-    return callback(new Error("Not allowed by CORS"));
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
   },
   credentials: true,
 }));
+
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", (_, res) => res.send("Server is running!"));
 app.use("/api/auth", authRoutes);
